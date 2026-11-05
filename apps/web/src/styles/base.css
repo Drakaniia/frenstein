@@ -1,0 +1,566 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FrenOS XP · base — tokens, colour schemes, the stage, scrollbars, motion
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --z-wallpaper: 0;
+  --z-icons: 2;
+  --z-windows: 4;
+  --z-fx: 5;
+  --z-taskbar: 6;
+  --z-start: 7;
+  --z-balloon: 8;
+  --z-dialog: 9;
+  --z-screensaver: 10;
+
+  --ui-font: Tahoma, 'Segoe UI', Verdana, 'DejaVu Sans', Geneva, sans-serif;
+  --title-font: 'Trebuchet MS', Tahoma, 'Segoe UI', Verdana, sans-serif;
+  --mono-font: 'Lucida Console', Consolas, 'Courier New', monospace;
+  --lcd-font: 'VT323', 'Lucida Console', monospace;
+  --pixel-font: 'Press Start 2P', 'VT323', monospace;
+
+  --xp-face: #ece9d8;
+  --xp-face-light: #f4f3ee;
+  --xp-face-dark: #d8d2bd;
+  --xp-text: #000000;
+  --xp-muted: #716f64;
+  --xp-border: #aca899;
+  --xp-field-border: #7f9db9;
+  --xp-tab-border: #919b9c;
+  --xp-group-border: #d0d0bf;
+  --xp-tab-accent: #e68b2c;
+  --xp-tab-accent-light: #ffc83c;
+  --xp-link: #0b4bd8;
+  --xp-balloon: #ffffe1;
+}
+
+/* ── colour schemes ───────────────────────────────────────────────────── */
+
+.stage,
+[data-theme='blue'] {
+  --xp-title: linear-gradient(180deg, #0997ff 0%, #0053ee 8%, #0050ee 40%, #0066ff 88%, #0066ff 93%, #005bff 95%, #003dd7 96%, #003dd7 100%);
+  --xp-title-inactive: linear-gradient(180deg, #7697e7 0%, #7e9ee3 3%, #94afe8 6%, #97b4e9 8%, #82a5e4 14%, #7c9fe2 17%, #7996de 25%, #7b99e1 56%, #82a9e9 81%, #80a5e7 89%, #7b96e1 94%, #7a93df 97%, #abbae3 100%);
+  --xp-title-text: #ffffff;
+  --xp-title-text-inactive: #d8e4f8;
+  --xp-title-shadow: 1px 1px 0 #0f1089;
+  --xp-title-edge: #0831d9;
+  --xp-frame: inset -1px -1px #00138c, inset 1px 1px #0831d9, inset -2px -2px #001ea0, inset 2px 2px #166aee, inset -3px -3px #003bda, inset 3px 3px #0855dd;
+  --xp-frame-inactive: inset -1px -1px #5a73c9, inset 1px 1px #7f97e0, inset -2px -2px #6d85d6, inset 2px 2px #9fb4ec, inset -3px -3px #8098e2, inset 3px 3px #93a9e8;
+  --xp-cap: linear-gradient(135deg, #a8c8ff 0%, #5994f8 14%, #2e72f2 42%, #1e60e8 72%, #3a7af2 100%);
+  --xp-cap-hover: linear-gradient(135deg, #c8dcff 0%, #74a8ff 14%, #4688fa 42%, #3274f2 72%, #5590ff 100%);
+  --xp-cap-down: linear-gradient(135deg, #1546b8 0%, #1c56d2 40%, #2a68e4 80%, #3d79ec 100%);
+  --xp-cap-glyph: #ffffff;
+  --xp-cap-border: #ffffff;
+  --xp-taskbar: linear-gradient(180deg, #1f2f86 0, #3165c4 3%, #3682e5 6%, #4490e6 10%, #3883e5 12%, #2b71e0 15%, #2663da 18%, #235bd6 20%, #2258d5 23%, #2157d6 38%, #245ddb 54%, #2562df 86%, #245fdc 89%, #2158d4 92%, #1d4ec0 95%, #1941a5 98%);
+  --xp-tray: linear-gradient(180deg, #0c59b9 1%, #139ee9 6%, #18b5f2 10%, #139beb 14%, #1290e8 19%, #0d8dea 63%, #0d9ff1 81%, #0f9eed 88%, #119be9 91%, #1392e2 94%, #137ed7 97%, #095bc9 100%);
+  --xp-tray-edge: #1042af;
+  --xp-tray-glow: #18bbff;
+  --xp-tray-text: #ffffff;
+  --xp-task: linear-gradient(180deg, #5c9bff 0%, #3c81f3 12%, #3a7ff2 50%, #3577ec 88%, #2a64d8 100%);
+  --xp-task-hover: linear-gradient(180deg, #7ab4ff 0%, #53a3ff 12%, #4c97fb 50%, #458cf6 88%, #3a7ae6 100%);
+  --xp-task-active: linear-gradient(180deg, #1a48a8 0%, #1e52b7 12%, #1f55bd 50%, #2159c2 100%);
+  --xp-task-text: #ffffff;
+  --xp-task-shadow: rgba(0, 0, 0, 0.35);
+  --xp-start-head: linear-gradient(180deg, #1868ce 0%, #0e60cb 12%, #0e60cb 20%, #1164cf 32%, #1667cf 33%, #1b6cd3 47%, #1e70d9 54%, #2476dc 60%, #297ae0 65%, #3482e3 77%, #3786e5 79%, #428ee9 90%, #4791eb 100%);
+  --xp-start-foot: linear-gradient(180deg, #4282d6 0%, #3b85e0 3%, #418ae3 5%, #418ae3 17%, #3c87e2 21%, #3786e4 26%, #3482e3 29%, #2e7ee1 39%, #2374df 49%, #2072db 57%, #196edb 62%, #176bd8 72%, #1468d5 75%, #1165d1 83%, #0f61cb 88%);
+  --xp-start-edge: #0b3cc1;
+  --xp-start-right: #d3e5fa;
+  --xp-start-right-edge: #95bdee;
+  --xp-start-right-text: #00136b;
+  --xp-start-hot: #2f71cd;
+  --xp-hot: #316ac5;
+  --xp-hot-text: #ffffff;
+  --xp-legend: #0046d5;
+  --xp-pane: linear-gradient(180deg, #7ba2e7 0%, #6375d6 100%);
+  --xp-pane-head: linear-gradient(90deg, #ffffff 0%, #c6d3f7 100%);
+  --xp-pane-head-text: #215dc6;
+  --xp-pane-body: #d6dff7;
+  --xp-pane-link: #215dc6;
+  --xp-pane-link-hover: #428eff;
+  --xp-pane-special: linear-gradient(90deg, #0048f1 0%, #2d6ef0 100%);
+  --xp-pane-special-body: #eff3ff;
+  --xp-scroll-thumb: linear-gradient(90deg, #b8cbfa 0%, #cad9fd 35%, #c7d6fd 60%, #aec2f5 100%);
+  --xp-scroll-thumb-h: linear-gradient(180deg, #b8cbfa 0%, #cad9fd 35%, #c7d6fd 60%, #aec2f5 100%);
+  --xp-scroll-edge: #9eb4ec;
+  --xp-scroll-grip: #8ca6e8;
+  --xp-welcome: #5a7edc;
+  --xp-welcome-band: #00309c;
+}
+
+[data-theme='olive'] {
+  --xp-title: linear-gradient(180deg, #ecf2d0 0%, #a6bd7d 7%, #8ea96a 22%, #8ea96c 50%, #97b277 80%, #87a264 92%, #6f8b4e 100%);
+  --xp-title-inactive: linear-gradient(180deg, #f0f1e2 0%, #ccd6b5 8%, #c1cda6 30%, #c4cfaa 70%, #b9c69e 100%);
+  --xp-title-text: #ffffff;
+  --xp-title-text-inactive: #f3f6ea;
+  --xp-title-shadow: 1px 1px 0 #485a2c;
+  --xp-title-edge: #7d955a;
+  --xp-frame: inset -1px -1px #5d7140, inset 1px 1px #8ba169, inset -2px -2px #6f8a4e, inset 2px 2px #b2c78f, inset -3px -3px #8da86b, inset 3px 3px #a2b97e;
+  --xp-frame-inactive: inset -1px -1px #a3b08a, inset 1px 1px #c3cdaa, inset -2px -2px #b5c19c, inset 2px 2px #dce4c8, inset -3px -3px #c5d0ad, inset 3px 3px #d2dbbd;
+  --xp-cap: linear-gradient(135deg, #eef4d6 0%, #b9cd92 14%, #93ad6c 42%, #80995a 72%, #9db577 100%);
+  --xp-cap-hover: linear-gradient(135deg, #f7fbe8 0%, #cfe0aa 14%, #a9c282 42%, #94ae6c 72%, #b2c98c 100%);
+  --xp-cap-down: linear-gradient(135deg, #6b8448 0%, #7a9456 40%, #8ca667 80%, #9db577 100%);
+  --xp-cap-glyph: #ffffff;
+  --xp-cap-border: #ffffff;
+  --xp-taskbar: linear-gradient(180deg, #6f7e4f 0, #e6ecc8 3%, #c3d1a1 8%, #b2c38c 18%, #a8ba82 40%, #a2b47c 70%, #95a96f 90%, #7f955c 100%);
+  --xp-tray: linear-gradient(180deg, #eaf0d4 0%, #d4deb5 10%, #c8d4a6 50%, #bccb98 90%, #a9ba84 100%);
+  --xp-tray-edge: #8da06a;
+  --xp-tray-glow: #f4f8e4;
+  --xp-tray-text: #2c3518;
+  --xp-task: linear-gradient(180deg, #f2f6e0 0%, #d6e0b8 15%, #c9d6a8 60%, #b8c894 100%);
+  --xp-task-hover: linear-gradient(180deg, #fbfdf2 0%, #e4ecca 15%, #d7e2b9 60%, #c6d4a4 100%);
+  --xp-task-active: linear-gradient(180deg, #98ad72 0%, #a6b97f 40%, #b2c38c 100%);
+  --xp-task-text: #1f2710;
+  --xp-task-shadow: rgba(60, 74, 30, 0.45);
+  --xp-start-head: linear-gradient(180deg, #a9bd86 0%, #94ab6f 20%, #8aa266 50%, #93ab70 80%, #9fb67c 100%);
+  --xp-start-foot: linear-gradient(180deg, #c4d2a2 0%, #a9bd86 15%, #94ab6f 60%, #849c60 100%);
+  --xp-start-edge: #7c9459;
+  --xp-start-right: #eef1e2;
+  --xp-start-right-edge: #c0cba2;
+  --xp-start-right-text: #29341a;
+  --xp-start-hot: #93a070;
+  --xp-hot: #93a070;
+  --xp-hot-text: #ffffff;
+  --xp-legend: #5e7a2e;
+  --xp-pane: linear-gradient(180deg, #ccd8ae 0%, #a8ba82 100%);
+  --xp-pane-head: linear-gradient(90deg, #ffffff 0%, #e2e8cc 100%);
+  --xp-pane-head-text: #56712c;
+  --xp-pane-body: #f2f5e6;
+  --xp-pane-link: #4a6427;
+  --xp-pane-link-hover: #7a9b3c;
+  --xp-pane-special: linear-gradient(90deg, #77904d 0%, #9cb276 100%);
+  --xp-pane-special-body: #fbfcf4;
+  --xp-scroll-thumb: linear-gradient(90deg, #d4dcb8 0%, #e6ecd0 40%, #dbe3c2 70%, #c6d1a7 100%);
+  --xp-scroll-thumb-h: linear-gradient(180deg, #d4dcb8 0%, #e6ecd0 40%, #dbe3c2 70%, #c6d1a7 100%);
+  --xp-scroll-edge: #b2bf92;
+  --xp-scroll-grip: #9aaa74;
+  --xp-welcome: #8ba56a;
+  --xp-welcome-band: #5d7540;
+}
+
+[data-theme='silver'] {
+  --xp-title: linear-gradient(180deg, #ffffff 0%, #eeeef5 8%, #d8d9e6 30%, #cbccdb 60%, #c1c2d3 88%, #a7a8bf 100%);
+  --xp-title-inactive: linear-gradient(180deg, #ffffff 0%, #f6f6f9 15%, #eaeaf0 60%, #dfdfe8 100%);
+  --xp-title-text: #18183c;
+  --xp-title-text-inactive: #7c7c98;
+  --xp-title-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);
+  --xp-title-edge: #a5a5be;
+  --xp-frame: inset -1px -1px #6e6e88, inset 1px 1px #b4b4c8, inset -2px -2px #8e8ea8, inset 2px 2px #e8e8f0, inset -3px -3px #b6b6c8, inset 3px 3px #d4d4e0;
+  --xp-frame-inactive: inset -1px -1px #a2a2b6, inset 1px 1px #d0d0dc, inset -2px -2px #bcbccc, inset 2px 2px #f2f2f6, inset -3px -3px #d0d0dc, inset 3px 3px #e2e2ea;
+  --xp-cap: linear-gradient(135deg, #ffffff 0%, #ececf3 30%, #d3d4e1 70%, #bebfd1 100%);
+  --xp-cap-hover: linear-gradient(135deg, #ffffff 0%, #f8f8fc 30%, #e3e4ef 70%, #d0d1e0 100%);
+  --xp-cap-down: linear-gradient(135deg, #a9aac0 0%, #bdbed0 50%, #d0d1df 100%);
+  --xp-cap-glyph: #4a4a6a;
+  --xp-cap-border: #8c8ca6;
+  --xp-taskbar: linear-gradient(180deg, #8d8da8 0, #f6f6fa 4%, #e3e3ec 12%, #d2d3e0 40%, #c9cad9 70%, #bbbcce 90%, #a4a5bc 100%);
+  --xp-tray: linear-gradient(180deg, #f8f8fb 0%, #e8e8ef 15%, #dcdce6 60%, #cdcedb 100%);
+  --xp-tray-edge: #9d9db6;
+  --xp-tray-glow: #ffffff;
+  --xp-tray-text: #1b1b3a;
+  --xp-task: linear-gradient(180deg, #ffffff 0%, #f0f0f5 20%, #e1e1ea 70%, #d4d4df 100%);
+  --xp-task-hover: linear-gradient(180deg, #ffffff 0%, #fafafd 20%, #eeeef4 70%, #e2e2ea 100%);
+  --xp-task-active: linear-gradient(180deg, #b9bacd 0%, #c8c9d8 40%, #d6d7e2 100%);
+  --xp-task-text: #1b1b3a;
+  --xp-task-shadow: rgba(60, 60, 90, 0.45);
+  --xp-start-head: linear-gradient(180deg, #f2f2f7 0%, #d9dae6 30%, #c6c7d8 70%, #b9bace 100%);
+  --xp-start-foot: linear-gradient(180deg, #e4e4ed 0%, #cfd0de 30%, #bfc0d2 70%, #b0b1c6 100%);
+  --xp-start-edge: #8c8ca6;
+  --xp-start-right: #eeeef4;
+  --xp-start-right-edge: #c4c4d4;
+  --xp-start-right-text: #1b1b3a;
+  --xp-start-hot: #b2b4bf;
+  --xp-hot: #8e90a8;
+  --xp-hot-text: #ffffff;
+  --xp-legend: #3d3d77;
+  --xp-pane: linear-gradient(180deg, #dadbe6 0%, #b6b7ca 100%);
+  --xp-pane-head: linear-gradient(90deg, #ffffff 0%, #e2e3ec 100%);
+  --xp-pane-head-text: #3d3d77;
+  --xp-pane-body: #f2f2f7;
+  --xp-pane-link: #2f2f66;
+  --xp-pane-link-hover: #5d5daa;
+  --xp-pane-special: linear-gradient(90deg, #7d7e9b 0%, #a3a4bd 100%);
+  --xp-pane-special-body: #fbfbfd;
+  --xp-scroll-thumb: linear-gradient(90deg, #e1e2ea 0%, #f3f3f7 40%, #e8e8ef 70%, #d3d4df 100%);
+  --xp-scroll-thumb-h: linear-gradient(180deg, #e1e2ea 0%, #f3f3f7 40%, #e8e8ef 70%, #d3d4df 100%);
+  --xp-scroll-edge: #b8b9c9;
+  --xp-scroll-grip: #a2a3b8;
+  --xp-welcome: #8d8fa8;
+  --xp-welcome-band: #4c4d6b;
+}
+
+[data-theme='rose'] {
+  --xp-title: linear-gradient(180deg, #ffa3cc 0%, #e94b91 8%, #e3468c 40%, #f2589c 88%, #f2589c 93%, #ea4f95 95%, #c42f72 96%, #c42f72 100%);
+  --xp-title-inactive: linear-gradient(180deg, #f2a6c8 0%, #eaa0c1 6%, #e696ba 14%, #e391b7 50%, #e89cbf 85%, #f0b3cf 100%);
+  --xp-title-text: #ffffff;
+  --xp-title-text-inactive: #fde8f1;
+  --xp-title-shadow: 1px 1px 0 #7e1446;
+  --xp-title-edge: #c82f74;
+  --xp-frame: inset -1px -1px #7a1446, inset 1px 1px #c82f74, inset -2px -2px #93195a, inset 2px 2px #f06aa6, inset -3px -3px #c73476, inset 3px 3px #dd4a8c;
+  --xp-frame-inactive: inset -1px -1px #c56c97, inset 1px 1px #e08fb5, inset -2px -2px #d27aa5, inset 2px 2px #f4b9d3, inset -3px -3px #df91b6, inset 3px 3px #eaa4c4;
+  --xp-cap: linear-gradient(135deg, #ffc6e0 0%, #f685b8 14%, #e9559a 42%, #d9428a 72%, #ee67a6 100%);
+  --xp-cap-hover: linear-gradient(135deg, #ffe0ee 0%, #ffa0ca 14%, #f56aab 42%, #e8579b 72%, #fb80b8 100%);
+  --xp-cap-down: linear-gradient(135deg, #a8215f 0%, #bd2d6f 40%, #d23f81 80%, #e1559a 100%);
+  --xp-cap-glyph: #ffffff;
+  --xp-cap-border: #ffffff;
+  --xp-taskbar: linear-gradient(180deg, #7a1446 0, #c63f7e 3%, #e2599a 6%, #ea69a5 10%, #e45d9c 12%, #db4e90 15%, #d44788 18%, #d04384 20%, #cf4283 23%, #cf4183 38%, #d34588 54%, #d8498c 86%, #d4478a 89%, #cc4283 92%, #ba3874 95%, #9b2d62 98%);
+  --xp-tray: linear-gradient(180deg, #b82f6e 1%, #f37fb6 6%, #fb98c6 10%, #f586ba 14%, #ef78b0 19%, #eb70ab 63%, #f283b8 81%, #f080b6 88%, #ec7bb2 91%, #e56fa9 94%, #d85d9b 97%, #bb3b7a 100%);
+  --xp-tray-edge: #9b2160;
+  --xp-tray-glow: #ffb3d6;
+  --xp-tray-text: #ffffff;
+  --xp-task: linear-gradient(180deg, #ff97c6 0%, #ef6aa9 12%, #ec66a6 50%, #e45c9d 88%, #d04b8a 100%);
+  --xp-task-hover: linear-gradient(180deg, #ffb6d8 0%, #fb86bd 12%, #f77cb6 50%, #f072ae 88%, #df5e9d 100%);
+  --xp-task-active: linear-gradient(180deg, #9e2160 0%, #ad2a6b 12%, #b12d6e 50%, #b93374 100%);
+  --xp-task-text: #ffffff;
+  --xp-task-shadow: rgba(80, 0, 40, 0.4);
+  --xp-start-head: linear-gradient(180deg, #c42f72 0%, #cf3a7d 20%, #d74687 47%, #df5291 65%, #e8619c 80%, #f070a8 100%);
+  --xp-start-foot: linear-gradient(180deg, #e3639e 0%, #e7609d 5%, #e05893 30%, #d44a87 60%, #c63c79 88%);
+  --xp-start-edge: #b0265f;
+  --xp-start-right: #fde3ef;
+  --xp-start-right-edge: #f2a2c7;
+  --xp-start-right-text: #6b0f3c;
+  --xp-start-hot: #d6458a;
+  --xp-hot: #d6458a;
+  --xp-hot-text: #ffffff;
+  --xp-legend: #c42f72;
+  --xp-pane: linear-gradient(180deg, #f4a3c9 0%, #d8679e 100%);
+  --xp-pane-head: linear-gradient(90deg, #ffffff 0%, #fbd3e5 100%);
+  --xp-pane-head-text: #b2286a;
+  --xp-pane-body: #fdebf3;
+  --xp-pane-link: #a8245f;
+  --xp-pane-link-hover: #e8559a;
+  --xp-pane-special: linear-gradient(90deg, #c42f72 0%, #e45d9c 100%);
+  --xp-pane-special-body: #fff5fa;
+  --xp-scroll-thumb: linear-gradient(90deg, #f6bcd6 0%, #fbd3e5 35%, #f9cde1 60%, #f0aacb 100%);
+  --xp-scroll-thumb-h: linear-gradient(180deg, #f6bcd6 0%, #fbd3e5 35%, #f9cde1 60%, #f0aacb 100%);
+  --xp-scroll-edge: #e796bc;
+  --xp-scroll-grip: #e07fad;
+  --xp-welcome: #e06aa2;
+  --xp-welcome-band: #a3225f;
+}
+
+/* ── document & stage ─────────────────────────────────────────────────── */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  overscroll-behavior: none;
+}
+
+#root {
+  width: 100%;
+  height: 100dvh;
+}
+
+.stage-mount {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  transform-origin: top left;
+  font-family: var(--ui-font);
+  font-size: var(--text-ui, 11px);
+  line-height: 1.25;
+  color: var(--xp-text);
+  background: #000;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Resets use :where() so they never outrank a component's own class rules. */
+:where(.stage) :where(button) {
+  font: inherit;
+  color: inherit;
+}
+
+:where(.stage) :where(input, textarea, select) {
+  font: inherit;
+}
+
+:where(.stage) :where(img, canvas) {
+  image-rendering: pixelated;
+}
+
+.selectable,
+.stage input,
+.stage textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Resize handles and dividers use system cursors unless the XP set is on. */
+.stage [data-cursor='ns'] {
+  cursor: ns-resize;
+}
+.stage [data-cursor='ew'] {
+  cursor: ew-resize;
+}
+.stage [data-cursor='nwse'] {
+  cursor: nwse-resize;
+}
+.stage [data-cursor='nesw'] {
+  cursor: nesw-resize;
+}
+.stage [data-cursor='hand'] {
+  cursor: pointer;
+}
+.stage[data-busy='true'] {
+  cursor: progress;
+}
+
+:where(.stage) :focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── XP scrollbars (Chromium/WebKit paint them; Firefox gets the colours) ─ */
+
+.stage * {
+  scrollbar-color: #c1d3fb #f3f1ec;
+}
+
+.stage ::-webkit-scrollbar {
+  width: 17px;
+  height: 17px;
+}
+
+.stage ::-webkit-scrollbar-track:vertical {
+  background: linear-gradient(90deg, #eeede5 0%, #fdfdfa 22%, #fdfdfa 78%, #f2f1eb 100%);
+}
+
+.stage ::-webkit-scrollbar-track:horizontal {
+  background: linear-gradient(180deg, #eeede5 0%, #fdfdfa 22%, #fdfdfa 78%, #f2f1eb 100%);
+}
+
+.stage ::-webkit-scrollbar-thumb {
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--xp-scroll-edge);
+  background-color: #c9d7fc;
+  min-height: 20px;
+}
+
+.stage ::-webkit-scrollbar-thumb:vertical {
+  background-image:
+    linear-gradient(180deg, transparent calc(50% - 4px), var(--xp-scroll-grip) calc(50% - 4px), var(--xp-scroll-grip) calc(50% - 3px), transparent calc(50% - 3px), transparent calc(50% - 1px), var(--xp-scroll-grip) calc(50% - 1px), var(--xp-scroll-grip) 50%, transparent 50%, transparent calc(50% + 2px), var(--xp-scroll-grip) calc(50% + 2px), var(--xp-scroll-grip) calc(50% + 3px), transparent calc(50% + 3px)),
+    var(--xp-scroll-thumb);
+  background-size: 7px 100%, 100% 100%;
+  background-position: center, center;
+  background-repeat: no-repeat;
+}
+
+.stage ::-webkit-scrollbar-thumb:horizontal {
+  background-image:
+    linear-gradient(90deg, transparent calc(50% - 4px), var(--xp-scroll-grip) calc(50% - 4px), var(--xp-scroll-grip) calc(50% - 3px), transparent calc(50% - 3px), transparent calc(50% - 1px), var(--xp-scroll-grip) calc(50% - 1px), var(--xp-scroll-grip) 50%, transparent 50%, transparent calc(50% + 2px), var(--xp-scroll-grip) calc(50% + 2px), var(--xp-scroll-grip) calc(50% + 3px), transparent calc(50% + 3px)),
+    var(--xp-scroll-thumb-h);
+  background-size: 100% 7px, 100% 100%;
+  background-position: center, center;
+  background-repeat: no-repeat;
+}
+
+.stage ::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.04);
+}
+
+.stage ::-webkit-scrollbar-button:single-button {
+  display: block;
+  width: 17px;
+  height: 17px;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--xp-scroll-edge);
+  background-color: #c9d7fc;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.stage ::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%234d6185' d='M3 0h1v1H3zM2 1h3v1H2zM1 2h2v1H1zM4 2h2v1H4zM0 3h2v1H0zM5 3h2v1H5z'/%3E%3C/svg%3E"), var(--xp-scroll-thumb);
+}
+.stage ::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%234d6185' d='M0 0h2v1H0zM5 0h2v1H5zM1 1h2v1H1zM4 1h2v1H4zM2 2h3v1H2zM3 3h1v1H3z'/%3E%3C/svg%3E"), var(--xp-scroll-thumb);
+}
+.stage ::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%234d6185' d='M3 0h1v2H3zM2 1h1v2H2zM1 2h1v3H1zM0 3h1v1H0zM2 4h1v2H2zM3 5h1v2H3z'/%3E%3C/svg%3E"), var(--xp-scroll-thumb-h);
+}
+.stage ::-webkit-scrollbar-button:single-button:horizontal:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%234d6185' d='M0 0h1v2H0zM1 1h1v2H1zM2 2h1v3H2zM3 3h1v1H3zM1 4h1v2H1zM0 5h1v2H0z'/%3E%3C/svg%3E"), var(--xp-scroll-thumb-h);
+}
+
+.stage ::-webkit-scrollbar-corner {
+  background: var(--xp-face);
+}
+
+/* Dark surfaces (Music, the boot screen) get slim dark scrollbars. */
+.stage .dark-scroll {
+  scrollbar-color: #4b4b63 #15151d;
+}
+.stage .dark-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.stage .dark-scroll::-webkit-scrollbar-track {
+  background: #15151d;
+}
+.stage .dark-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #5a5a78, #3d3d52);
+  border: 1px solid #15151d;
+  box-shadow: none;
+  border-radius: 2px;
+}
+.stage .dark-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* ── motion ───────────────────────────────────────────────────────────── */
+
+@keyframes xp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes xp-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes xp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes xp-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes xp-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes xp-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes xp-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes xp-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.18);
+  }
+  24% {
+    transform: scale(0.96);
+  }
+  36% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+
+@keyframes xp-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes xp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-in {
+  animation: xp-fade-in 320ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage *,
+  .stage *::before,
+  .stage *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
