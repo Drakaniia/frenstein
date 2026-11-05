@@ -1,8 +1,8 @@
 name: CI
 
 # Lint, typecheck and build must all pass before anything is deployed.
-# The deploy job reuses the build from the CI job, checks the deployed site
-# with a smoke test, and puts the live URL in the run summary.
+# The deploy job reuses the exact artifact the CI job built, only runs when a
+# deploy secret is configured, and smoke-tests the live URL afterwards.
 
 on:
   push:
@@ -65,15 +65,15 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: ${{ github.event_name == 'push' && 'Deploy' || 'Preview deploy' }}
+    name: ${{ github.ref == 'refs/heads/main' && 'Deploy' || 'Preview deploy' }}
     needs: ci
-    # Only deploy real code, never a pull request from a fork.
+    # Only deploy real code from this repository, never a pull request from a fork.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-      url: ${{ steps.target.outputs.url }}
+      url: ${{ steps.smoke.outputs.url || vars.FRENOS_SITE_URL }}
     env:
       LIVE_URL: ${{ vars.FRENOS_SITE_URL }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -92,55 +92,39 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      # No secret means there is nothing to deploy: say so once, then skip the rest.
       - name: Decide the deploy target
         id: target
         run: |
           if [ -n "$VERCEL_TOKEN" ]; then
-            echo "url=${LIVE_URL:-https://frenos-xp-f46776.corepass-sites.com/}" >> "$GITHUB_OUTPUT"
             echo "provider=vercel" >> "$GITHUB_OUTPUT"
+            echo "Deploying to Vercel."
           else
-            echo "url=${LIVE_URL:-https://frenos-xp-f46776.corepass-sites.com/}" >> "$GITHUB_OUTPUT"
-            echo "provider=corepass" >> "$GITHUB_OUTPUT"
+            echo "provider=none" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Not deployed::No VERCEL_TOKEN secret is set, so this build was verified but not deployed."
           fi
-
-      # ── Vercel: used whenever the VERCEL_TOKEN secret is present ─────────
-      - name: Install dependencies (Vercel CLI)
-        if: steps.target.outputs.provider == 'vercel'
-        run: bun install --frozen-lockfile
 
       - name: Deploy to Vercel
         if: steps.target.outputs.provider == 'vercel'
         id: vercel
         run: |
           set -eu
-          args=(--prod --yes --token "$VERCEL_TOKEN")
-          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
-            args=("${args[@]/--prod/}" --token "$VERCEL_TOKEN")
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            url=$(bunx vercel@latest deploy apps/web/dist --prod --yes --token "$VERCEL_TOKEN" | tail -n 1)
+          else
+            url=$(bunx vercel@latest deploy apps/web/dist --yes --token "$VERCEL_TOKEN" | tail -n 1)
           fi
-          url=$(bunx vercel@latest deploy apps/web/dist "${args[@]}" | tail -n 1)
+          [ -n "$url" ] || { echo "::error::Vercel returned no deployment URL"; exit 1; }
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed to $url"
 
-      # ── Corepass: the default, because this site is already published ────
-      - name: Publish to corepass
-        if: steps.target.outputs.provider == 'corepass'
-        env:
-          COREPASS_TOKEN: ${{ secrets.COREPASS_TOKEN }}
-        run: |
-          if [ -z "$COREPASS_TOKEN" ]; then
-            echo "::warning title=Deploy skipped::No COREPASS_TOKEN (or VERCEL_TOKEN) secret is set, so the verified build was not deployed. See docs/ci.md."
-            exit 0
-          fi
-          # The corepass CLI publishes a built directory to the site's domain.
-          bunx corepass deploy apps/web/dist --site frenos-xp --token "$COREPASS_TOKEN" --public
-          echo "Published apps/web/dist to ${LIVE_URL}"
-
       - name: Smoke test the deployed site
         id: smoke
+        if: steps.target.outputs.provider != 'none'
         run: |
           set -eu
           url="${{ steps.vercel.outputs.url || env.LIVE_URL }}"
-          [ -n "$url" ] || { echo "::error::No deployed URL to test"; exit 1; }
+          [ -n "$url" ] || { echo "::error::Deployed, but no URL to test. Set the FRENOS_SITE_URL repository variable."; exit 1; }
           case "$url" in http*) ;; *) url="https://$url" ;; esac
           echo "Checking $url"
           code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 5 --retry-delay 3 --retry-all-errors "$url")
@@ -174,5 +158,11 @@ jobs:
             echo "| Typecheck (tsc) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Build (vite) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo
-            echo "Deployed: ${{ steps.smoke.outputs.url || env.LIVE_URL || 'not deployed' }}"
+            if [ -n "${{ steps.smoke.outputs.url }}" ]; then
+              echo "Live site checked: ${{ steps.smoke.outputs.url }}"
+            elif [ -n "${LIVE_URL}" ]; then
+              echo "Live site: ${LIVE_URL} (not redeployed by this run)"
+            else
+              echo "This run verified the build but did not deploy."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

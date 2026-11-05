@@ -11,29 +11,31 @@
 | `ci` | `bun run typecheck` (`tsc -b`) | any TypeScript error |
 | `ci` | `bun run build` (`tsc -b && vite build`) | the production build fails |
 | `ci` | Verify build output | `dist/index.html` or `dist/assets/` is missing |
-| `deploy` | Deploy | the deploy command exits non-zero |
+| `deploy` | Deploy to Vercel | the deploy command exits non-zero (only runs when `VERCEL_TOKEN` is set) |
 | `deploy` | Smoke test | the deployed URL does not return HTTP 200, has no `#root`, or a referenced JS/CSS asset 404s |
 
 `deploy` only runs once `ci` has passed, and it re-downloads the exact artifact that `ci` built, so nothing is rebuilt between checks.
 
 ## Deploy targets
 
-The deploy job picks a provider automatically:
+The deploy job deploys to **Vercel** when the `VERCEL_TOKEN` secret exists: it runs `vercel deploy` against `apps/web/dist`, with `--prod` on `main` and a preview deployment otherwise.
 
-1. **Vercel** — if the `VERCEL_TOKEN` secret exists. It runs `vercel deploy` against `apps/web/dist` (with `--prod` on `main`).
-2. **corepass** — otherwise, if the `COREPASS_TOKEN` secret exists. It publishes to the existing `frenos-xp` site.
+Without that secret, CI still lints, typechecks, builds and verifies the output; the deploy steps are skipped with a notice instead of failing. In that case the site is published from the Remy app (`publish_site`), which is how `frenos-xp` is served today.
 
-If neither secret is set, CI still lints, typechecks, builds and verifies, and the deploy step stops with a warning instead of failing the build.
+If a deployment happens, the smoke test then loads the live URL and checks:
+
+- the page answers HTTP 200 after redirects;
+- it contains the `<div id="root">` the app mounts into;
+- every JS and CSS file the page references also answers 200 (this catches a wrong `base` path).
 
 ### Repository settings to add
 
 | Kind | Name | Value |
 |---|---|---|
-| Secret | `COREPASS_TOKEN` | a corepass deploy token, or |
-| Secret | `VERCEL_TOKEN` | a Vercel token, if you would rather deploy there |
-| Variable | `FRENOS_SITE_URL` | the live URL used by the smoke test, e.g. `https://frenos-xp-f46776.corepass-sites.com/` |
+| Secret | `VERCEL_TOKEN` | a Vercel token, to allow CI deploys |
+| Variable | `FRENOS_SITE_URL` | the site to smoke-test when Vercel is not used, e.g. `https://frenos-xp-f46776.corepass-sites.com/` |
 
-`FRENOS_SITE_URL` is optional; the workflow falls back to the current site URL.
+Neither is required for the lint / typecheck / build gate — that part is green with no configuration at all.
 
 ## Running the same checks locally
 
