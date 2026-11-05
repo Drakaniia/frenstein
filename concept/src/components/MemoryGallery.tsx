@@ -17,11 +17,14 @@ const memories = [
 export const MemoryGallery = () => {
   const rowRefs = useRef<HTMLDivElement[]>([]);
   const animationsRef = useRef<gsap.core.Tween[]>([]);
+  const timeScaleSprings = useRef<gsap.core.Tween[]>([]);
 
   useEffect(() => {
     const rows = rowRefs.current;
     animationsRef.current.forEach(a => a.kill());
+    timeScaleSprings.current.forEach(t => t.kill());
     animationsRef.current = [];
+    timeScaleSprings.current = [];
 
     rows.forEach((row, i) => {
       if (!row) return;
@@ -41,7 +44,6 @@ export const MemoryGallery = () => {
         });
       }
 
-      const fullWidth = row.scrollWidth;
       const direction = i % 2 === 0 ? 1 : -1;
 
       // Start positions
@@ -64,18 +66,53 @@ export const MemoryGallery = () => {
       animationsRef.current.push(anim);
     });
 
-    return () => animationsRef.current.forEach(a => a.kill());
+    return () => {
+      animationsRef.current.forEach(a => a.kill());
+      timeScaleSprings.current.forEach(t => t.kill());
+    };
   }, []);
 
-  const handleRowEnter = (index: number) =>
-    animationsRef.current[index]?.pause();
-  const handleRowLeave = (index: number) =>
-    animationsRef.current[index]?.play();
+  // Spring-based timeScale on hover — smoothly decelerates/accelerates
+  // instead of a hard pause/resume (Apple: interruptible, continuous motion)
+  const handleRowEnter = (index: number) => {
+    const anim = animationsRef.current[index];
+    if (!anim) return;
+
+    // Kill any existing timeScale spring
+    timeScaleSprings.current[index]?.kill();
+
+    // Spring animate timeScale from current to 0.25 (slow crawl)
+    const spring = gsap.to(anim, {
+      timeScale: 0.25,
+      duration: 0.6,
+      ease: 'power2.out',
+      overwrite: true,
+    });
+    timeScaleSprings.current[index] = spring;
+  };
+
+  const handleRowLeave = (index: number) => {
+    const anim = animationsRef.current[index];
+    if (!anim) return;
+
+    timeScaleSprings.current[index]?.kill();
+
+    const spring = gsap.to(anim, {
+      timeScale: 1,
+      duration: 0.8,
+      ease: 'elastic.out(1, 0.5)',
+      overwrite: true,
+    });
+    timeScaleSprings.current[index] = spring;
+  };
 
   return (
     <section className="py-20 bg-transparent relative z-10">
       <div className="text-center mb-12 px-4">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+        <h2
+          className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent tracking-tight"
+          style={{ letterSpacing: '-0.02em', lineHeight: '1.1' }}
+        >
           Memories Together 📸
         </h2>
         <p className="text-lg text-muted-foreground">
@@ -95,16 +132,23 @@ export const MemoryGallery = () => {
             {memories.map((memory, index) => (
               <Card
                 key={`${memory.id}-${rowIndex}-${index}`}
-                className="memory-card flex-shrink-0 basis-[80%] sm:basis-1/2 md:basis-1/3 xl:basis-1/5 h-96 overflow-hidden hover:scale-105 transition-transform shadow-lg relative"
+                className="memory-card flex-shrink-0 basis-[80%] sm:basis-1/2 md:basis-1/3 xl:basis-1/5 h-96 overflow-hidden shadow-lg relative group"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(12px) saturate(150%)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                  boxShadow:
+                    '0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.2) inset',
+                  transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
               >
                 <img
                   src={memory.image}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-500 ease-out"
                   draggable="false"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                  <p className="text-xl font-semibold text-white"></p>
-                </div>
+                {/* Scroll-edge mask: subtle fade at the bottom where content meets card edge */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
               </Card>
             ))}
           </div>

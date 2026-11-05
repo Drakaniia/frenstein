@@ -1,0 +1,366 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Apple Design System ──
+   Material/depth hierarchy, typography, accessibility, and animation foundations.
+   All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 20 14% 97%;
+    --foreground: 20 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 10% 10%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 339 82% 67%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 20 14% 95%;
+    --muted-foreground: 20 10% 45%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 20 14% 90%;
+    --input: 20 14% 90%;
+    --ring: 24 95% 53%;
+
+    --radius: 1rem;
+
+    /* ── Material system: Apple translucent depth hierarchy ── */
+    /* Material weights (light → heavy): surface → card → sheet → sidebar → modal */
+    --material-surface: rgba(255, 255, 255, 0.5);
+    --material-surface-blur: 8px;
+    --material-card: rgba(255, 255, 255, 0.6);
+    --material-card-blur: 16px;
+    --material-sheet: rgba(255, 255, 255, 0.7);
+    --material-sheet-blur: 20px;
+    --material-sidebar: rgba(255, 255, 255, 0.55);
+    --material-sidebar-blur: 24px;
+    --material-border: rgba(255, 255, 255, 0.4);
+    --material-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --material-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --material-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+    /* Celebration gradients */
+    --gradient-celebration: linear-gradient(
+      135deg,
+      hsl(24 95% 53%),
+      hsl(339 82% 67%)
+    );
+    --gradient-hero: linear-gradient(180deg, hsl(20 14% 97%), hsl(339 82% 95%));
+    --gradient-glow: radial-gradient(
+      circle at 50% 0%,
+      hsl(24 95% 53% / 0.2),
+      transparent 70%
+    );
+
+    /* Shadows */
+    --shadow-celebration: 0 20px 60px -15px hsl(24 95% 53% / 0.4);
+    --shadow-float: 0 10px 40px -10px hsl(339 82% 67% / 0.3);
+
+    /* Animation timings */
+    --transition-smooth: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 20 20% 8%;
+    --foreground: 20 10% 98%;
+
+    --card: 20 20% 12%;
+    --card-foreground: 20 10% 98%;
+
+    --popover: 20 20% 12%;
+    --popover-foreground: 20 10% 98%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 339 82% 67%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 20 20% 18%;
+    --muted-foreground: 20 10% 65%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 20 20% 18%;
+    --input: 20 20% 18%;
+    --ring: 24 95% 53%;
+
+    /* Dark material system */
+    --material-surface: rgba(30, 30, 35, 0.5);
+    --material-card: rgba(30, 30, 35, 0.6);
+    --material-sheet: rgba(30, 30, 35, 0.7);
+    --material-sidebar: rgba(30, 30, 35, 0.55);
+    --material-border: rgba(255, 255, 255, 0.1);
+    --material-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --material-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --material-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
+
+    --gradient-celebration: linear-gradient(
+      135deg,
+      hsl(24 95% 53%),
+      hsl(339 82% 67%)
+    );
+    --gradient-hero: linear-gradient(180deg, hsl(20 20% 8%), hsl(339 82% 15%));
+    --gradient-glow: radial-gradient(
+      circle at 50% 0%,
+      hsl(24 95% 53% / 0.3),
+      transparent 70%
+    );
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* ── Material/depth utility classes ── */
+@layer components {
+  /* Translucent surface — lightest, for backgrounds */
+  .material-surface {
+    background: var(--material-surface);
+    backdrop-filter: blur(var(--material-surface-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--material-surface-blur)) saturate(180%);
+    border: 1px solid var(--material-border);
+  }
+
+  /* Translucent card — for cards, panels */
+  .material-card {
+    background: var(--material-card);
+    backdrop-filter: blur(var(--material-card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--material-card-blur)) saturate(160%);
+    border: 1px solid var(--material-border);
+    box-shadow: var(--material-shadow-md);
+  }
+
+  /* Translucent sheet — for bottom sheets, overlays */
+  .material-sheet {
+    background: var(--material-sheet);
+    backdrop-filter: blur(var(--material-sheet-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--material-sheet-blur)) saturate(160%);
+    border: 1px solid var(--material-border);
+    box-shadow: var(--material-shadow-lg);
+  }
+
+  /* Translucent sidebar — heaviest, for structural chrome */
+  .material-sidebar {
+    background: var(--material-sidebar);
+    backdrop-filter: blur(var(--material-sidebar-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--material-sidebar-blur)) saturate(180%);
+    box-shadow: var(--material-shadow-lg);
+  }
+
+  /* Scroll-edge gradient mask — fade content where it meets floating chrome */
+  .scroll-edge-top {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 40px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40px);
+  }
+
+  .scroll-edge-bottom {
+    mask-image: linear-gradient(to top, transparent 0%, black 40px);
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, black 40px);
+  }
+
+  .scroll-edge-both {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 40px,
+      black calc(100% - 40px),
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 40px,
+      black calc(100% - 40px),
+      transparent 100%
+    );
+  }
+}
+
+/* ── Typography foundation (Apple: optical sizing, tracking, leading) ── */
+@layer base {
+  /* System font stack — already ships optical sizing and tracking tables */
+  :root {
+    font: 100%/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Display/large headings: tight leading, negative tracking */
+  h1, .text-display {
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+
+  /* Body: comfortable leading, near-zero tracking */
+  body {
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+
+  /* Small/caption text: slightly positive tracking for legibility */
+  small, .text-caption, .text-xs {
+    letter-spacing: 0.01em;
+  }
+
+  /* Respect user text-size preference (Dynamic Type equivalent) */
+  html {
+    font-size: 100%; /* 16px base — scales with browser zoom */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ── Accessibility: reduced motion ── */
+/* Apple: reduce ≠ remove — use cross-fades instead of slides/springs */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep essential feedback animations (opacity-only cross-fades) */
+  .allow-motion-fade {
+    animation-duration: 200ms !important;
+    transition-duration: 200ms !important;
+    animation-timing-function: ease !important;
+    transition-timing-function: ease !important;
+  }
+
+  /* Disable spring-like and parallax transforms, but preserve static positioning */
+  .parallax,
+  .spring-animated,
+  [class*="animate-"],
+  [class*="motion-"] {
+    transform: none !important;
+  }
+
+  /* Disable continuous animations (pulsing, spinning) */
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-float {
+    animation: none !important;
+  }
+
+  /* Replace slides with opacity cross-fades */
+  .sheet,
+  .drawer,
+  .modal-enter {
+    transition: opacity 200ms ease !important;
+    transform: none !important;
+  }
+}
+
+/* ── Accessibility: reduced transparency ── */
+/* Make translucent surfaces more solid for legibility */
+@media (prefers-reduced-transparency: reduce) {
+  .material-surface,
+  .material-card,
+  .material-sheet,
+  .material-sidebar,
+  [style*="backdrop-filter"],
+  [class*="backdrop-blur"] {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .dark .material-surface,
+  .dark .material-card,
+  .dark .material-sheet,
+  .dark .material-sidebar,
+  .dark [style*="backdrop-filter"],
+  .dark [class*="backdrop-blur"] {
+    background: hsl(20 20% 12%) !important;
+  }
+
+  /* Add defined borders to replace the translucent depth cues */
+  .material-card,
+  .material-sheet,
+  .material-sidebar {
+    border: 1px solid hsl(var(--border)) !important;
+  }
+}
+
+/* ── Accessibility: high contrast ── */
+@media (prefers-contrast: more) {
+  .material-surface,
+  .material-card,
+  .material-sheet,
+  .material-sidebar {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid hsl(var(--foreground)) !important;
+  }
+
+  .dark .material-surface,
+  .dark .material-card,
+  .dark .material-sheet,
+  .dark .material-sidebar {
+    background: hsl(20 20% 8%) !important;
+    border: 2px solid hsl(var(--foreground)) !important;
+  }
+}

@@ -1,4 +1,4 @@
-import ParticleSystem3D from '@/components/ParticleSystem3D';
+import ParticleSystem3D from '@/components/particles';
 
 const FinalSection = () => {
   return (

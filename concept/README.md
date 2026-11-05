@@ -1,4 +1,4 @@
-# Vibe Kanban - Birthday Celebration Website
+# Frenstein - Birthday Celebration Website
 
 This is an interactive birthday celebration website built with React, TypeScript, and Vite. It features password unlocking, animations, memory galleries, and a cutting-edge 3D particle system controlled by hand gestures.
 
@@ -39,8 +39,9 @@ src/
 ├── hooks/              # Custom Hooks
 ├── lib/                # Utility functions
 └── assets/             # Static assets
-    └── 3D-models/      # 3D model files
 ```
+
+> **Note:** `src/components/ui/` is a **vendored/generated dependency** (shadcn/ui, installed via `npx shadcn@latest add <component>`). Do not hand-edit these files — regenerate them with the CLI instead.
 
 ## Core Features
 
@@ -86,10 +87,12 @@ src/
 
 ### Development Environment
 ```bash
-npm install  # Install dependencies
-npm run dev  # Start development server
+bun install  # Install dependencies
+bun run dev  # Start development server
 ```
 Starts the development server, default running on `http://localhost:5173`
+
+> The project uses **Bun** as its package manager (`bun install` / `bun run <script>`). A `bun.lock` lockfile is committed.
 
 ### Using the Particle System
 1. Navigate to the main page
@@ -106,20 +109,20 @@ Starts the development server, default running on `http://localhost:5173`
 
 ### Build Production Version
 ```bash
-npm run build
+bun run build
 ```
 Builds the production version to the `dist/` directory
 
 ### Preview Production Version
 ```bash
-npm run preview
+bun run preview
 ```
 Previews the built production version
 
 ### Code Checking and Formatting
 ```bash
-npm run lint      # ESLint code checking
-npm run format    # Prettier code formatting
+bun run lint      # ESLint code checking
+bun run format    # Prettier code formatting
 ```
 
 ## Development Conventions
@@ -180,15 +183,11 @@ Tailwind CSS theme configuration in `tailwind.config.ts`:
 
 ## Documentation
 
-- [Quick Start Guide](./docs/QUICK_START.md) - Get up and running quickly
-- [Particle System Documentation](./docs/particle-system-hand-tracking.md) - Detailed particle system guide
-- [3D Table Scene](./docs/3d-table-scene.md) - Table scene documentation
-- [Development Guide](./docs/DEVELOPMENT_GUIDE.md) - Development best practices
-- [Implementation Summary](./docs/IMPLEMENTATION_SUMMARY.md) - Complete feature overview
+- [Codebase Audit](./frenstein-audit.md) - Structural health report and refactoring plan
 
 ## Deployment Suggestions
 
-1. Build production version: `npm run build`
+1. Build production version: `bun run build`
 2. Deploy contents of `dist/` directory to static file server
 3. Ensure server supports SPA routing (all routes redirect to index.html)
 4. Configure appropriate caching strategy

@@ -1,7 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "installCommand": "bun install",
+  "buildCommand": "bun run build",
   "outputDirectory": "dist",
+  "env": {
+    "BUN_VERSION": "1.3.14"
+  },
   "routes": [
     {
       "src": "/assets/(.*)",
