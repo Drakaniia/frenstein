@@ -7,6 +7,7 @@
     "dev": "bun run --filter '@scroll-story/web' dev",
     "build": "bun run --filter '@scroll-story/web' build",
     "preview": "bun run --filter '@scroll-story/web' preview",
-    "typecheck": "bun run --filter '@scroll-story/web' typecheck"
+    "typecheck": "bun run --filter '@scroll-story/web' typecheck",
+    "lint": "bun run --filter '@scroll-story/web' lint"
   }
 }
