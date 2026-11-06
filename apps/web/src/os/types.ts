@@ -107,7 +107,7 @@ export const DEFAULT_SETTINGS: Settings = {
   clock24h: false,
   wallpaper: 'sunset',
   wallpaperMotion: true,
-  theme: 'blue',
+  theme: 'rose',
   iconSize: 'medium',
   showLabels: true,
   screensaverEnabled: true,
