@@ -1,8 +1,8 @@
 name: CI
 
-# Lint, typecheck and build must all pass before anything is deployed.
-# The deploy job reuses the exact artifact the CI job built, only runs when a
-# deploy secret is configured, and smoke-tests the live URL afterwards.
+# Lint, typecheck and build must pass before anything is deployed.
+# The deploy job publishes the exact artifact CI built to GitHub Pages and
+# then smoke-tests the live URL, so every push to main ships automatically.
 
 on:
   push:
@@ -52,8 +52,7 @@ jobs:
           set -eu
           test -f "$SITE_DIR/index.html" || { echo "::error::Build produced no index.html"; exit 1; }
           test -d "$SITE_DIR/assets" || { echo "::error::Build produced no assets/ directory"; exit 1; }
-          count=$(find "$SITE_DIR/assets" -type f | wc -l)
-          echo "Build output: $(find "$SITE_DIR" -type f | wc -l) files ($count under assets/)"
+          echo "Build output: $(find "$SITE_DIR" -type f | wc -l) files"
           echo "Bundle size: $(du -sh "$SITE_DIR" | cut -f1)"
 
       - name: Upload the build for the deploy job
@@ -65,104 +64,91 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: ${{ github.ref == 'refs/heads/main' && 'Deploy' || 'Preview deploy' }}
+    name: Deploy to GitHub Pages
     needs: ci
-    # Only deploy real code from this repository, never a pull request from a fork.
+    # Pull requests from forks are verified but never deployed.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-      url: ${{ steps.smoke.outputs.url || vars.FRENOS_SITE_URL }}
-    env:
-      LIVE_URL: ${{ vars.FRENOS_SITE_URL }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
       - name: Download the verified build
         uses: actions/download-artifact@v4
         with:
           name: web-dist
           path: apps/web/dist
 
-      - name: Set up Bun ${{ env.BUN_VERSION }}
-        uses: oven-sh/setup-bun@v2
+      # Turns Pages on for the repository the first time this runs.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          enablement: true
 
-      # No secret means there is nothing to deploy: say so once, then skip the rest.
-      - name: Decide the deploy target
-        id: target
-        run: |
-          if [ -n "$VERCEL_TOKEN" ]; then
-            echo "provider=vercel" >> "$GITHUB_OUTPUT"
-            echo "Deploying to Vercel."
-          else
-            echo "provider=none" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Not deployed::No VERCEL_TOKEN secret is set, so this build was verified but not deployed."
-          fi
+      - name: Package the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
 
-      - name: Deploy to Vercel
-        if: steps.target.outputs.provider == 'vercel'
-        id: vercel
-        run: |
-          set -eu
-          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
-            url=$(bunx vercel@latest deploy apps/web/dist --prod --yes --token "$VERCEL_TOKEN" | tail -n 1)
-          else
-            url=$(bunx vercel@latest deploy apps/web/dist --yes --token "$VERCEL_TOKEN" | tail -n 1)
-          fi
-          [ -n "$url" ] || { echo "::error::Vercel returned no deployment URL"; exit 1; }
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "Deployed to $url"
+      - name: Publish
+        id: deploy
+        uses: actions/deploy-pages@v4
 
       - name: Smoke test the deployed site
-        id: smoke
-        if: steps.target.outputs.provider != 'none'
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
         run: |
           set -eu
-          url="${{ steps.vercel.outputs.url || env.LIVE_URL }}"
-          [ -n "$url" ] || { echo "::error::Deployed, but no URL to test. Set the FRENOS_SITE_URL repository variable."; exit 1; }
-          case "$url" in http*) ;; *) url="https://$url" ;; esac
-          echo "Checking $url"
-          code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 5 --retry-delay 3 --retry-all-errors "$url")
+          [ -n "$PAGE_URL" ] || { echo "::error::Pages returned no URL"; exit 1; }
+          echo "Checking $PAGE_URL"
+          code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 5 --retry-delay 3 --retry-all-errors "$PAGE_URL")
           echo "HTTP $code"
           test "$code" = "200" || { echo "::error::The site answered HTTP $code"; exit 1; }
-          grep -qi '<div id="root"' /tmp/index.html || { echo "::error::index.html does not contain the app root"; exit 1; }
-          # Every asset the page references must exist (catches a broken base path).
+          grep -qi 'id="root"' /tmp/index.html || { echo "::error::index.html does not contain the app root"; exit 1; }
+
+          # Every asset the page references must load (catches a wrong base path).
           missing=0
           for ref in $(grep -oE '(src|href)="[^"]+\.(js|css)"' /tmp/index.html | sed -E 's/.*="([^"]+)"/\1/'); do
             case "$ref" in
               http*) asset="$ref" ;;
-              /*) asset="${url%/}$ref" ;;
-              *) asset="${url%/}/$ref" ;;
+              /*) asset="${PAGE_URL%/}$ref" ;;
+              *) asset="${PAGE_URL%/}/$ref" ;;
             esac
             asset_code=$(curl -sS -o /dev/null -w '%{http_code}' -L --retry 3 --retry-all-errors "$asset")
             echo "  $asset -> $asset_code"
             [ "$asset_code" = "200" ] || missing=1
           done
           test "$missing" = "0" || { echo "::error::A referenced asset is missing on the deployed site"; exit 1; }
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+          # The build must actually contain this commit's content.
+          main_js=$(grep -oE 'assets/index-[^"]+\.js' /tmp/index.html | head -n 1)
+          curl -sS -o /tmp/bundle.js -L "${PAGE_URL%/}/$main_js"
+          grep -q 'Frenstein' /tmp/bundle.js || { echo "::error::The deployed bundle is stale (no 'Frenstein' in $main_js)"; exit 1; }
+          if grep -q 'Birthday Edition' /tmp/bundle.js; then
+            echo "::error::The deployed bundle still contains the old 'Birthday Edition' text"
+            exit 1
+          fi
+          echo "Deployed bundle $main_js is current."
 
       - name: Write the run summary
         if: always()
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
         run: |
           {
-            echo "## FrenOS XP CI"
+            echo "## FrenOS XP"
             echo
             echo "| Check | Result |"
             echo "|---|---|"
             echo "| Lint (oxlint) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Typecheck (tsc) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Build (vite) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
+            echo "| Deploy (GitHub Pages) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo
-            if [ -n "${{ steps.smoke.outputs.url }}" ]; then
-              echo "Live site checked: ${{ steps.smoke.outputs.url }}"
-            elif [ -n "${LIVE_URL}" ]; then
-              echo "Live site: ${LIVE_URL} (not redeployed by this run)"
-            else
-              echo "This run verified the build but did not deploy."
-            fi
+            if [ -n "${PAGE_URL}" ]; then echo "Live: ${PAGE_URL}"; fi
           } >> "$GITHUB_STEP_SUMMARY"

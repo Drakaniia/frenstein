@@ -11,31 +11,25 @@
 | `ci` | `bun run typecheck` (`tsc -b`) | any TypeScript error |
 | `ci` | `bun run build` (`tsc -b && vite build`) | the production build fails |
 | `ci` | Verify build output | `dist/index.html` or `dist/assets/` is missing |
-| `deploy` | Deploy to Vercel | the deploy command exits non-zero (only runs when `VERCEL_TOKEN` is set) |
+| `deploy` | Deploy to GitHub Pages | publishing fails, or the smoke test below fails |
 | `deploy` | Smoke test | the deployed URL does not return HTTP 200, has no `#root`, or a referenced JS/CSS asset 404s |
 
 `deploy` only runs once `ci` has passed, and it re-downloads the exact artifact that `ci` built, so nothing is rebuilt between checks.
 
-## Deploy targets
+## Deployment
 
-The deploy job deploys to **Vercel** when the `VERCEL_TOKEN` secret exists: it runs `vercel deploy` against `apps/web/dist`, with `--prod` on `main` and a preview deployment otherwise.
+Every push to `main` deploys to **GitHub Pages**, using the exact artifact the `ci` job built (nothing is rebuilt). No secrets or tokens are needed: the job uses the repository's own Pages permissions, and the `Configure Pages` step turns Pages on the first time it runs.
 
-Without that secret, CI still lints, typechecks, builds and verifies the output; the deploy steps are skipped with a notice instead of failing. In that case the site is published from the Remy app (`publish_site`), which is how `frenos-xp` is served today.
+Pull requests from forks run `ci` only and are never deployed.
 
-If a deployment happens, the smoke test then loads the live URL and checks:
+After publishing, the job smoke-tests the live URL and fails the run when:
 
-- the page answers HTTP 200 after redirects;
-- it contains the `<div id="root">` the app mounts into;
-- every JS and CSS file the page references also answers 200 (this catches a wrong `base` path).
+- the page does not answer HTTP 200 after redirects;
+- the page has no `#root` element;
+- a JS or CSS file it references does not answer 200 (catches a wrong `base` path);
+- the deployed bundle does not contain `Frenstein`, or still contains the removed `Birthday Edition` text — a staleness guard, because a stale bundle is exactly how the old build stayed live before.
 
-### Repository settings to add
-
-| Kind | Name | Value |
-|---|---|---|
-| Secret | `VERCEL_TOKEN` | a Vercel token, to allow CI deploys |
-| Variable | `FRENOS_SITE_URL` | the site to smoke-test when Vercel is not used, e.g. `https://frenos-xp-f46776.corepass-sites.com/` |
-
-Neither is required for the lint / typecheck / build gate — that part is green with no configuration at all.
+The environment URL for each run is shown on the workflow run page and in the job summary.
 
 ## Running the same checks locally
 

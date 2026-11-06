@@ -8,7 +8,7 @@
 
 export const CONTENT = {
   osName: 'FrenOS XP',
-  edition: 'Birthday Edition',
+  edition: 'Personal',
   version: '20.2306',
 
   /** The account shown on the Welcome screen and the Start menu. */
@@ -46,7 +46,7 @@ export const CONTENT = {
     'Detecting hearts ........... 1 found (yours)',
     '',
     'Verifying DMI Pool Data .... Update Success',
-    'Starting FrenOS XP Birthday Edition ...',
+    'Starting FrenOS XP ...',
   ],
   bootSkipHint: 'Press any key to skip',
 
@@ -176,7 +176,7 @@ export const CONTENT = {
   trashEmptyLine: 'Empty. Nothing left to worry about.',
 
   about: {
-    lines: ['FrenOS XP · Birthday Edition', 'Version 20.2306', 'Built with love'],
+    lines: ['FrenOS XP · Personal', 'Version 20.2306', 'Built with love'],
     licensedTo: 'Frenstein',
   },
 
