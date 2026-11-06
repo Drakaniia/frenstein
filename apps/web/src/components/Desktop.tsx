@@ -49,7 +49,6 @@ export function Desktop() {
   const [focused, setFocused] = useState(0);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [refresh, setRefresh] = useState(0);
-  const [birthdaySeen, setBirthdaySeen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const idleTimer = useRef(0);
   const { settings } = state;
@@ -62,9 +61,7 @@ export function Desktop() {
   const iconFor = useCallback((appId: AppId) => (appId === 'trash' ? (trash.length > 0 ? 'bin-full' : 'bin') : APPS[appId].icon), [trash.length]);
 
   // The present keeps gently bobbing until it has been opened once.
-  useEffect(() => {
-    if (state.windows.some((w) => w.appId === 'birthday')) setBirthdaySeen(true);
-  }, [state.windows]);
+  const birthdaySeen = state.windows.some((w) => w.appId === 'birthday');
 
   // Focus the first shortcut after logging on so keyboard users start there.
   useEffect(() => {
