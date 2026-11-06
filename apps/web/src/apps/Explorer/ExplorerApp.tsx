@@ -49,7 +49,7 @@ export function ExplorerApp({ win, home }: { win: WindowState; home: string[] })
   const listRef = useRef<HTMLDivElement>(null);
 
   const path = history[cursor] ?? [];
-  const stack = useMemo(() => resolvePath(path), [path]);
+  const stack = resolvePath(path);
   const folder = stack[stack.length - 1] ?? FS_ROOT;
   const atRoot = folder.id === FS_ROOT.id;
 
