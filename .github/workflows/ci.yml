@@ -1,8 +1,8 @@
 name: CI
 
 # Lint, typecheck and build must pass before anything is deployed.
-# The deploy job publishes the exact artifact CI built to GitHub Pages and
-# then smoke-tests the live URL, so every push to main ships automatically.
+# The deploy job pushes the exact artifact CI built to the `gh-pages` branch
+# and then smoke-tests the live URL, so every push to main ships by itself.
 
 on:
   push:
@@ -20,6 +20,8 @@ permissions:
 env:
   BUN_VERSION: 1.3.14
   SITE_DIR: apps/web/dist
+  # Live address on the gh-pages branch (works for any repository name).
+  PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
 
 jobs:
   ci:
@@ -52,6 +54,11 @@ jobs:
           set -eu
           test -f "$SITE_DIR/index.html" || { echo "::error::Build produced no index.html"; exit 1; }
           test -d "$SITE_DIR/assets" || { echo "::error::Build produced no assets/ directory"; exit 1; }
+          # A build that still carries the removed copy must never ship.
+          if grep -rq 'Birthday Edition' "$SITE_DIR/assets"/*.js; then
+            echo "::error::The build still contains the removed 'Birthday Edition' text"
+            exit 1
+          fi
           echo "Build output: $(find "$SITE_DIR" -type f | wc -l) files"
           echo "Bundle size: $(du -sh "$SITE_DIR" | cut -f1)"
 
@@ -71,45 +78,65 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: read
-      pages: write
-      id-token: write
+      contents: write
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ env.PAGES_URL }}
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
       - name: Download the verified build
         uses: actions/download-artifact@v4
         with:
           name: web-dist
-          path: apps/web/dist
+          path: .deploy
 
-      # Turns Pages on for the repository the first time this runs.
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      # Keeps GitHub's Jekyll step from dropping files that start with "_".
+      - name: Disable Jekyll processing
+        run: touch .deploy/.nojekyll
+
+      - name: Publish to the gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          enablement: true
-
-      - name: Package the site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/web/dist
-
-      - name: Publish
-        id: deploy
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .deploy
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy: ${{ github.sha }}"
 
       - name: Smoke test the deployed site
         env:
-          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+          PAGE_URL: ${{ env.PAGES_URL }}
         run: |
           set -eu
-          [ -n "$PAGE_URL" ] || { echo "::error::Pages returned no URL"; exit 1; }
           echo "Checking $PAGE_URL"
-          code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 5 --retry-delay 3 --retry-all-errors "$PAGE_URL")
-          echo "HTTP $code"
-          test "$code" = "200" || { echo "::error::The site answered HTTP $code"; exit 1; }
-          grep -qi 'id="root"' /tmp/index.html || { echo "::error::index.html does not contain the app root"; exit 1; }
+          # Pages can take a moment to serve a fresh deploy: retry, then verify content.
+          attempt=1
+          max=12
+          bundle_ok=1
+          while [ "$attempt" -le "$max" ]; do
+            code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 3 --retry-all-errors "$PAGE_URL") || code=000
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ] && grep -qi 'id="root"' /tmp/index.html; then
+              main_js=$(grep -oE 'assets/index-[^"]+\.js' /tmp/index.html | head -n 1 || true)
+              if [ -n "$main_js" ]; then
+                curl -sS -o /tmp/bundle.js -L --retry 3 --retry-all-errors "${PAGE_URL%/}/$main_js" || true
+                if grep -q 'Frenstein' /tmp/bundle.js && ! grep -q 'Birthday Edition' /tmp/bundle.js; then
+                  bundle_ok=0
+                  echo "Deployed bundle $main_js is current."
+                  break
+                fi
+                echo "bundle $main_js is still the previous build"
+              fi
+            fi
+            attempt=$((attempt + 1))
+            sleep 15
+          done
+
+          test "$bundle_ok" = "0" || { echo "::error::The live site did not serve the new build in time"; exit 1; }
 
           # Every asset the page references must load (catches a wrong base path).
           missing=0
@@ -125,20 +152,10 @@ jobs:
           done
           test "$missing" = "0" || { echo "::error::A referenced asset is missing on the deployed site"; exit 1; }
 
-          # The build must actually contain this commit's content.
-          main_js=$(grep -oE 'assets/index-[^"]+\.js' /tmp/index.html | head -n 1)
-          curl -sS -o /tmp/bundle.js -L "${PAGE_URL%/}/$main_js"
-          grep -q 'Frenstein' /tmp/bundle.js || { echo "::error::The deployed bundle is stale (no 'Frenstein' in $main_js)"; exit 1; }
-          if grep -q 'Birthday Edition' /tmp/bundle.js; then
-            echo "::error::The deployed bundle still contains the old 'Birthday Edition' text"
-            exit 1
-          fi
-          echo "Deployed bundle $main_js is current."
-
       - name: Write the run summary
         if: always()
         env:
-          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+          PAGE_URL: ${{ env.PAGES_URL }}
         run: |
           {
             echo "## FrenOS XP"
@@ -148,7 +165,7 @@ jobs:
             echo "| Lint (oxlint) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Typecheck (tsc) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Build (vite) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
-            echo "| Deploy (GitHub Pages) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
+            echo "| Deploy (gh-pages) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo
-            if [ -n "${PAGE_URL}" ]; then echo "Live: ${PAGE_URL}"; fi
+            echo "Live: ${PAGE_URL}"
           } >> "$GITHUB_STEP_SUMMARY"
