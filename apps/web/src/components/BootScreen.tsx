@@ -99,7 +99,6 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
               <small>Made With Love</small>
               <strong>FrenOS</strong>
               <sup>xp</sup>
-              <em>{CONTENT.edition}</em>
             </div>
           </div>
           <div className="xp-progress-track" role="progressbar" aria-label="Starting up">
