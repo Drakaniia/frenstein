@@ -1,8 +1,8 @@
 name: CI
 
-# Lint, typecheck and build must pass before anything is deployed.
-# The deploy job pushes the exact artifact CI built to the `gh-pages` branch
-# and then smoke-tests the live URL, so every push to main ships by itself.
+# Lint, typecheck and build must pass on every push and pull request.
+# Deployment itself is handled by Vercel's git integration (see vercel.json):
+# pushes to main deploy to production, other branches get preview deploys.
 
 on:
   push:
@@ -20,8 +20,6 @@ permissions:
 env:
   BUN_VERSION: 1.3.14
   SITE_DIR: apps/web/dist
-  # Live address on the gh-pages branch (works for any repository name).
-  PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
 
 jobs:
   ci:
@@ -62,100 +60,8 @@ jobs:
           echo "Build output: $(find "$SITE_DIR" -type f | wc -l) files"
           echo "Bundle size: $(du -sh "$SITE_DIR" | cut -f1)"
 
-      - name: Upload the build for the deploy job
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-dist
-          path: ${{ env.SITE_DIR }}
-          if-no-files-found: error
-          retention-days: 7
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: ci
-    # Pull requests from forks are verified but never deployed.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-    environment:
-      name: github-pages
-      url: ${{ env.PAGES_URL }}
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
-      - name: Download the verified build
-        uses: actions/download-artifact@v4
-        with:
-          name: web-dist
-          path: .deploy
-
-      # Keeps GitHub's Jekyll step from dropping files that start with "_".
-      - name: Disable Jekyll processing
-        run: touch .deploy/.nojekyll
-
-      - name: Publish to the gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .deploy
-          publish_branch: gh-pages
-          force_orphan: true
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "deploy: ${{ github.sha }}"
-
-      - name: Smoke test the deployed site
-        env:
-          PAGE_URL: ${{ env.PAGES_URL }}
-        run: |
-          set -eu
-          echo "Checking $PAGE_URL"
-          # Pages can take a moment to serve a fresh deploy: retry, then verify content.
-          attempt=1
-          max=12
-          bundle_ok=1
-          while [ "$attempt" -le "$max" ]; do
-            code=$(curl -sS -o /tmp/index.html -w '%{http_code}' -L --retry 3 --retry-all-errors "$PAGE_URL") || code=000
-            echo "attempt $attempt: HTTP $code"
-            if [ "$code" = "200" ] && grep -qi 'id="root"' /tmp/index.html; then
-              main_js=$(grep -oE 'assets/index-[^"]+\.js' /tmp/index.html | head -n 1 || true)
-              if [ -n "$main_js" ]; then
-                curl -sS -o /tmp/bundle.js -L --retry 3 --retry-all-errors "${PAGE_URL%/}/$main_js" || true
-                if grep -q 'Frenstein' /tmp/bundle.js && ! grep -q 'Birthday Edition' /tmp/bundle.js; then
-                  bundle_ok=0
-                  echo "Deployed bundle $main_js is current."
-                  break
-                fi
-                echo "bundle $main_js is still the previous build"
-              fi
-            fi
-            attempt=$((attempt + 1))
-            sleep 15
-          done
-
-          test "$bundle_ok" = "0" || { echo "::error::The live site did not serve the new build in time"; exit 1; }
-
-          # Every asset the page references must load (catches a wrong base path).
-          missing=0
-          for ref in $(grep -oE '(src|href)="[^"]+\.(js|css)"' /tmp/index.html | sed -E 's/.*="([^"]+)"/\1/'); do
-            case "$ref" in
-              http*) asset="$ref" ;;
-              /*) asset="${PAGE_URL%/}$ref" ;;
-              *) asset="${PAGE_URL%/}/$ref" ;;
-            esac
-            asset_code=$(curl -sS -o /dev/null -w '%{http_code}' -L --retry 3 --retry-all-errors "$asset")
-            echo "  $asset -> $asset_code"
-            [ "$asset_code" = "200" ] || missing=1
-          done
-          test "$missing" = "0" || { echo "::error::A referenced asset is missing on the deployed site"; exit 1; }
-
       - name: Write the run summary
         if: always()
-        env:
-          PAGE_URL: ${{ env.PAGES_URL }}
         run: |
           {
             echo "## FrenOS XP"
@@ -165,7 +71,6 @@ jobs:
             echo "| Lint (oxlint) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Typecheck (tsc) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo "| Build (vite) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
-            echo "| Deploy (gh-pages) | ${{ job.status == 'success' && 'passed' || 'see logs' }} |"
             echo
-            echo "Live: ${PAGE_URL}"
+            echo "Deployment is handled by Vercel git integration (main -> production, other branches -> preview)."
           } >> "$GITHUB_STEP_SUMMARY"

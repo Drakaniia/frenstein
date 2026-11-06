@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "bun install --frozen-lockfile",
+  "buildCommand": "bun run build",
+  "outputDirectory": "apps/web/dist",
+  "git": {
+    "deploymentEnabled": {
+      "gh-pages": false,
+      "vk/13f3-vercel": false
+    }
+  }
+}
