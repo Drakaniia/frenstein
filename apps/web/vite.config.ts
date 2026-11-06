@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // Relative asset URLs, so the built site works at any path or domain.
+  base: './',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
