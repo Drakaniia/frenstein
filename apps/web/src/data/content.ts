@@ -186,9 +186,10 @@ export const CONTENT = {
    * (defaults to `file`). Missing files show up greyed out until added.
    */
   musicPlaylist: [
-    { id: 'seven', title: 'seven', artist: 'Taylor Swift', duration: '3:28', file: 'seven', cover: 'cover' },
-    { id: 'lover', title: 'Lover', artist: 'Taylor Swift', duration: '3:41', file: 'lover', cover: 'lover' },
-    { id: 'the-only-exception', title: 'The Only Exception', artist: 'Paramore', duration: '4:27', file: 'the-only-exception', cover: 'the-only-exception' },
+    { id: 'seven', title: 'seven', artist: 'Taylor Swift', duration: '3:29', file: 'seven', cover: 'cover' },
+    { id: 'lover', title: 'Lover', artist: 'Taylor Swift', duration: '3:49', file: 'lover', cover: 'lover' },
+    { id: 'enchanted', title: "Enchanted (Taylor's Version)", artist: 'Taylor Swift', duration: '5:56', file: 'enchanted', cover: 'enchanted' },
+    { id: 'the-only-exception', title: 'The Only Exception', artist: 'Paramore', duration: '4:28', file: 'the-only-exception', cover: 'the-only-exception' },
   ],
 } as const;
 

@@ -26,6 +26,7 @@ const OPEN: Record<string, { appId: AppId; payload?: WindowPayload }> = {
   wmplayer: { appId: 'music' },
   seven: { appId: 'music', payload: 'seven' },
   lover: { appId: 'music', payload: 'lover' },
+  enchanted: { appId: 'music', payload: 'enchanted' },
   'the only exception': { appId: 'music', payload: 'the-only-exception' },
   paramore: { appId: 'music', payload: 'the-only-exception' },
   'taylor swift': { appId: 'music', payload: 'lover' },

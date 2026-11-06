@@ -44,7 +44,7 @@ export const PLAYLIST: Song[] = (CONTENT.musicPlaylist as readonly TrackDef[]).m
   artist: track.artist,
   duration: track.duration,
   load: audioByName.get(track.file.toLowerCase()) ?? null,
-  cover: coverByName.get((track.cover ?? track.file).toLowerCase()) ?? null,
+  cover: coverByName.get((track.cover ?? track.file).toLowerCase()) ?? coverByName.get('cover') ?? null,
   fileName: `${track.file}.mp3`,
 }));
 
