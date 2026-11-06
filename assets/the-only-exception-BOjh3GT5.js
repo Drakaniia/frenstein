@@ -1,0 +1,1 @@
+var e=new URL(`the-only-exception-Duvt6yOe.mp3`,import.meta.url).href;export{e as default};
